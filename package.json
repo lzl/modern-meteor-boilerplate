@@ -2,10 +2,28 @@
   "name": "meteor-boilerplate",
   "private": true,
   "scripts": {
-    "start": "meteor run"
+    "start": "meteor run",
+    "prettier": "prettier-eslint --write",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "npm run prettier",
+      "git add"
+    ]
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.36",
     "meteor-node-stubs": "^0.3.2"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "eslint": "^4.17.0",
+    "eslint-plugin-meteor": "^4.2.0",
+    "eslint-plugin-react": "^7.6.1",
+    "husky": "^0.14.3",
+    "lint-staged": "^6.1.0",
+    "prettier": "^1.10.2",
+    "prettier-eslint-cli": "^4.7.0"
   }
 }
