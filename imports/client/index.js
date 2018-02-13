@@ -24,11 +24,12 @@ const httpLink = new HttpLink({
 //   return forward(operation)
 // })
 
-const cache = new InMemoryCache()
+const cache = new InMemoryCache().restore(window.__APOLLO_CLIENT__)
 
 const client = new ApolloClient({
   link: httpLink,
   cache,
+  connectToDevTools: Meteor.isDevelopment,
 })
 
 onPageLoad(async () => {

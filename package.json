@@ -25,6 +25,7 @@
     "graphql": "^0.13.0",
     "graphql-tag": "^2.7.3",
     "graphql-tools": "^2.21.0",
+    "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.5",
     "lru-cache": "^4.1.1",
     "meteor-node-stubs": "^0.3.2",
