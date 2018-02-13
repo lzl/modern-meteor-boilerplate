@@ -4,6 +4,7 @@ import { onPageLoad } from 'meteor/server-render'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import LRU from 'lru-cache'
+import { ServerStyleSheet } from 'styled-components'
 
 import ServerRoutes from './routes'
 import './collections'
@@ -18,13 +19,17 @@ const getSSRCache = (url, context) => {
   if (ssrCache.has(url.pathname)) {
     return ssrCache.get(url.pathname)
   } else {
+    const sheet = new ServerStyleSheet()
     // const htmlStream = renderToStaticNodeStream(<ServerRoutes url={url} context={context} />)
-    const htmlString = renderToStaticMarkup(<ServerRoutes url={url} context={context} />)
+    const htmlString = renderToStaticMarkup(
+      sheet.collectStyles(<ServerRoutes url={url} context={context} />),
+    )
+    const styleTags = sheet.getStyleTags()
     const helmet = Helmet.renderStatic()
     const meta = helmet.meta.toString()
     const title = helmet.title.toString()
     const link = helmet.link.toString()
-    const newSSRCache = { html: htmlString, meta, title, link }
+    const newSSRCache = { html: htmlString, styleTags, meta, title, link }
     Meteor.defer(() => {
       // ssrCache.set(url.pathname, { ...newSSRCache, html: htmlString })
       ssrCache.set(url.pathname, newSSRCache)
@@ -40,4 +45,5 @@ onPageLoad(sink => {
   sink.appendToHead(cache.meta)
   sink.appendToHead(cache.title)
   sink.appendToHead(cache.link)
+  sink.appendToHead(cache.styleTags)
 })
