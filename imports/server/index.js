@@ -4,6 +4,8 @@ import { renderToNodeStream } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 
 import ServerRoutes from './routes'
+import './collections'
+import './fixtures'
 
 onPageLoad(sink => {
   const context = {}
