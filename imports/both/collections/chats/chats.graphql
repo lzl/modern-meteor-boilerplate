@@ -1,0 +1,12 @@
+type Chat {
+  _id: String!
+  text: String!
+}
+
+extend type Query {
+  chats: [Chat]
+}
+
+extend type Mutation {
+  createChat(text: String!): Chat
+}
