@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet'
 import { Link } from 'react-router-dom'
 
 import PostList from '../components/posts'
-import ChatList from '../components/chats'
+// import ChatList from '../components/chats'
 
 const Home = () => (
   <div>
@@ -15,10 +15,11 @@ const Home = () => (
     <hr />
     <h2>Posts</h2>
     <PostList />
-    <hr />
-    <h2>Chats</h2>
-    <ChatList />
   </div>
 )
+
+// <hr />
+// <h2>Chats</h2>
+// <ChatList />
 
 export default Home

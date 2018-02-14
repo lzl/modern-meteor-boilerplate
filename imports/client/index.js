@@ -9,8 +9,6 @@ import { InMemoryCache } from 'apollo-cache-inmemory'
 
 import getClientRoutes from './routes'
 
-const httpLink = new HttpLink()
-
 // const authLink = new ApolloLink((operation, forward) => {
 //   const token = Accounts._storedLoginToken()
 //   operation.setContext(() => ({
@@ -21,11 +19,11 @@ const httpLink = new HttpLink()
 //   return forward(operation)
 // })
 
-const cache = new InMemoryCache().restore(window.__APOLLO_STATE__)
-
 const client = new ApolloClient({
-  link: httpLink,
-  cache,
+  link: new HttpLink(),
+  cache: new InMemoryCache().restore(window.__APOLLO_STATE__),
+  // connectToDevTools: Meteor.isDevelopment,
+  connectToDevTools: true,
 })
 
 onPageLoad(async () => {

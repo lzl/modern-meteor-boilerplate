@@ -1,54 +1,51 @@
 import { Meteor } from 'meteor/meteor'
 import React from 'react'
 import { onPageLoad } from 'meteor/server-render'
-import { renderToStaticMarkup } from 'react-dom/server'
+// import { renderToStaticMarkup } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import LRU from 'lru-cache'
 import { ServerStyleSheet } from 'styled-components'
 import 'isomorphic-fetch'
-import { ApolloProvider } from 'react-apollo'
+import { ApolloProvider, renderToStringWithData } from 'react-apollo'
 import { ApolloClient } from 'apollo-client'
-import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
+import { SchemaLink } from 'apollo-link-schema'
 
+import schema from './schema'
 import ServerRoutes from './routes'
-
-const httpLink = new HttpLink({
-  uri: 'http://localhost:3000/graphql',
-  credentials: 'same-origin',
-})
-
-const cache = new InMemoryCache()
-
-const client = new ApolloClient({
-  ssrMode: Meteor.isServer,
-  link: httpLink,
-  cache,
-})
 
 const ssrCache = LRU({
   max: 500,
-  maxAge: 1000 * 60 * 60,
+  maxAge: 1000 * 30,
 })
 
-const getSSRCache = (url, context) => {
+const getSSRCache = async (url, context) => {
   if (ssrCache.has(url.pathname)) {
     return ssrCache.get(url.pathname)
   } else {
+    const client = new ApolloClient({
+      ssrMode: true,
+      link: new SchemaLink({ schema }),
+      cache: new InMemoryCache(),
+    })
     const sheet = new ServerStyleSheet()
     const jsx = sheet.collectStyles(
       <ApolloProvider client={client}>
         <ServerRoutes url={url} context={context} />
       </ApolloProvider>,
     )
-    const state = `<script>window.__APOLLO_STATE__=${JSON.stringify(cache.extract())};</script>`
-    const html = renderToStaticMarkup(jsx)
+    // const html = renderToStaticMarkup(jsx)
+    const html = await renderToStringWithData(jsx)
+    const state = `<script>window.__APOLLO_STATE__=${JSON.stringify(client.extract()).replace(
+      /</g,
+      '\\u003c',
+    )}</script>`
     const styleTags = sheet.getStyleTags()
     const helmet = Helmet.renderStatic()
     const meta = helmet.meta.toString()
     const title = helmet.title.toString()
     const link = helmet.link.toString()
-    const newSSRCache = { state, html, styleTags, meta, title, link }
+    const newSSRCache = { html, state, styleTags, meta, title, link }
     Meteor.defer(() => {
       ssrCache.set(url.pathname, newSSRCache)
     })
@@ -56,11 +53,11 @@ const getSSRCache = (url, context) => {
   }
 }
 
-onPageLoad(sink => {
+onPageLoad(async sink => {
   const context = {}
-  const cache = getSSRCache(sink.request.url, context)
-  sink.appendToBody(cache.state)
+  const cache = await getSSRCache(sink.request.url, context)
   sink.renderIntoElementById('app', cache.html)
+  sink.appendToBody(cache.state)
   sink.appendToHead(cache.meta)
   sink.appendToHead(cache.title)
   sink.appendToHead(cache.link)

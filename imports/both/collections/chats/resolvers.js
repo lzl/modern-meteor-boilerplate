@@ -2,7 +2,7 @@ import Chats from './'
 
 export default {
   Query: {
-    chats(obj, args, { userId }) {
+    chats(obj, args) {
       return Chats.find().fetch()
     },
   },

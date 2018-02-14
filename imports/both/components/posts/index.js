@@ -82,11 +82,6 @@ export default compose(
         mutate({
           mutation: addPost,
           variables: { text },
-          update: (proxy, { data: { addPost } }) => {
-            const data = proxy.readQuery({ query: fetchPosts })
-            data.posts.push(addPost)
-            proxy.writeQuery({ query: fetchPosts, data })
-          },
           optimisticResponse: {
             __typename: 'Mutation',
             addPost: {
@@ -94,6 +89,16 @@ export default compose(
               text,
               _id: Random.id(),
             },
+          },
+          // optimisticResponse: {
+          //   __typename: 'Post',
+          //   _id: Random.id(),
+          //   text,
+          // },
+          update: (proxy, { data: { addPost } }) => {
+            const data = proxy.readQuery({ query: fetchPosts })
+            data.posts.push(addPost)
+            proxy.writeQuery({ query: fetchPosts, data })
           },
         }),
     }),

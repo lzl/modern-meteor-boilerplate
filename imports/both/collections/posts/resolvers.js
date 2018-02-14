@@ -2,7 +2,7 @@ import Posts from './'
 
 export default {
   Query: {
-    posts(obj, args, { userId }) {
+    posts(obj, args) {
       return Posts.find().fetch()
     },
   },
