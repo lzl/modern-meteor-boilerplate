@@ -8,7 +8,7 @@ export default {
   },
 
   Mutation: {
-    createPost(obj, { text }) {
+    addPost(obj, { text }) {
       const postId = Posts.insert({
         text,
       })

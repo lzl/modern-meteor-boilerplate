@@ -8,5 +8,5 @@ type Query {
 }
 
 type Mutation {
-  createPost(text: String!): Post
+  addPost(text: String!): Post
 }

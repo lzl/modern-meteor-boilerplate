@@ -8,7 +8,7 @@ export default {
   },
 
   Mutation: {
-    createPost(obj, { text }) {
+    createChat(obj, { text }) {
       const chatId = Chats.insert({
         text,
       })

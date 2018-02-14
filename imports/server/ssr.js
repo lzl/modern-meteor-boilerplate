@@ -18,7 +18,6 @@ const httpLink = new HttpLink({
   credentials: 'same-origin',
 })
 
-// const cache = new InMemoryCache().restore(window.__APOLLO_STATE__)
 const cache = new InMemoryCache()
 
 const client = new ApolloClient({
@@ -42,14 +41,14 @@ const getSSRCache = (url, context) => {
         <ServerRoutes url={url} context={context} />
       </ApolloProvider>,
     )
-    // const state = `<script>window.__APOLLO_STATE__=${JSON.stringify(cache.extract())};</script>`
+    const state = `<script>window.__APOLLO_STATE__=${JSON.stringify(cache.extract())};</script>`
     const html = renderToStaticMarkup(jsx)
     const styleTags = sheet.getStyleTags()
     const helmet = Helmet.renderStatic()
     const meta = helmet.meta.toString()
     const title = helmet.title.toString()
     const link = helmet.link.toString()
-    const newSSRCache = { html, styleTags, meta, title, link }
+    const newSSRCache = { state, html, styleTags, meta, title, link }
     Meteor.defer(() => {
       ssrCache.set(url.pathname, newSSRCache)
     })
@@ -60,7 +59,7 @@ const getSSRCache = (url, context) => {
 onPageLoad(sink => {
   const context = {}
   const cache = getSSRCache(sink.request.url, context)
-  // sink.appendToBody(cache.state)
+  sink.appendToBody(cache.state)
   sink.renderIntoElementById('app', cache.html)
   sink.appendToHead(cache.meta)
   sink.appendToHead(cache.title)

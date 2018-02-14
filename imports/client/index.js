@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor'
 import React from 'react'
 import { hydrate } from 'react-dom'
 import { onPageLoad } from 'meteor/server-render'
@@ -10,9 +9,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory'
 
 import getClientRoutes from './routes'
 
-const httpLink = new HttpLink({
-  uri: Meteor.absoluteUrl('graphql'),
-})
+const httpLink = new HttpLink()
 
 // const authLink = new ApolloLink((operation, forward) => {
 //   const token = Accounts._storedLoginToken()
@@ -24,12 +21,11 @@ const httpLink = new HttpLink({
 //   return forward(operation)
 // })
 
-const cache = new InMemoryCache().restore(window.__APOLLO_CLIENT__)
+const cache = new InMemoryCache().restore(window.__APOLLO_STATE__)
 
 const client = new ApolloClient({
   link: httpLink,
   cache,
-  connectToDevTools: Meteor.isDevelopment,
 })
 
 onPageLoad(async () => {
