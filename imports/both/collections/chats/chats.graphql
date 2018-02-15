@@ -8,5 +8,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  createChat(text: String!): Chat
+  addChat(text: String!): Chat
+}
+
+type Subscription {
+  chatAdded: Chat
 }

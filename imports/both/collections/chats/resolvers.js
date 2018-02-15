@@ -1,4 +1,5 @@
 import Chats from './'
+import pubsub from '/imports/both/pubsub'
 
 export default {
   Query: {
@@ -8,11 +9,19 @@ export default {
   },
 
   Mutation: {
-    createChat(obj, { text }) {
+    addChat(obj, { text }) {
       const chatId = Chats.insert({
         text,
       })
-      return Chats.findOne(chatId)
+      const chat = Chats.findOne(chatId)
+      pubsub.publish('chatAdded', { chatAdded: chat })
+      return chat
+    },
+  },
+
+  Subscription: {
+    chatAdded: {
+      subscribe: () => pubsub.asyncIterator('chatAdded'),
     },
   },
 }
