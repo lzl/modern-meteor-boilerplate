@@ -1,0 +1,13 @@
+type User {
+  _id: String
+  emails: [Email]
+}
+
+type Email {
+  address: String
+  verified: Boolean
+}
+
+extend type Query {
+  me: User
+}

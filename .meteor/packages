@@ -21,3 +21,4 @@ react-meteor-data
 apollo
 swydo:graphql
 swydo:ddp-apollo
+accounts-password

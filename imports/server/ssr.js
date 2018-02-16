@@ -10,6 +10,8 @@ import { ApolloProvider, renderToStringWithData } from 'react-apollo'
 import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { SchemaLink } from 'apollo-link-schema'
+import { ApolloLink, from } from 'apollo-link'
+import { HttpLink } from 'apollo-link-http'
 
 import schema from './schema'
 import ServerRoutes from './routes'
@@ -23,9 +25,23 @@ const getSSRCache = async (url, context) => {
   if (ssrCache.has(url.pathname)) {
     return ssrCache.get(url.pathname)
   } else {
+    const authLink = new ApolloLink((operation, forward) => {
+      operation.setContext(() => ({
+        headers: {
+          'meteor-login-token': context.loginToken,
+        },
+      }))
+      return forward(operation)
+    })
+    const httpLink = new HttpLink({
+      uri: `${Meteor.absoluteUrl()}/graphql`,
+      credentials: 'same-origin',
+    })
+
     const client = new ApolloClient({
       ssrMode: true,
-      link: new SchemaLink({ schema }),
+      // link: new SchemaLink({ schema }),
+      link: from([authLink, httpLink]),
       cache: new InMemoryCache(),
     })
     const sheet = new ServerStyleSheet()
@@ -54,7 +70,10 @@ const getSSRCache = async (url, context) => {
 }
 
 onPageLoad(async sink => {
-  const context = {}
+  // console.log('cookies:', sink.getCookies())
+  // console.log('headers:', sink.getHeaders())
+  const cookies = sink.getCookies()
+  const context = { loginToken: cookies.MeteorLoginToken }
   const cache = await getSSRCache(sink.request.url, context)
   sink.renderIntoElementById('app', cache.html)
   sink.appendToBody(cache.state)
