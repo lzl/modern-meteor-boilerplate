@@ -3,17 +3,16 @@ import pubsub from '/imports/both/pubsub'
 
 export default {
   Query: {
-    chats(obj, args) {
+    chats(root, params, context) {
       return Chats.find().fetch()
     },
   },
 
   Mutation: {
-    addChat(obj, { text }) {
-      const chatId = Chats.insert({
-        text,
-      })
-      const chat = Chats.findOne(chatId)
+    addChat(root, params, context) {
+      const { text } = params
+      const chatId = Chats.insert({ text })
+      const chat = Chats.findOne({ _id: chatId })
       pubsub.publish('chatAdded', { chatAdded: chat })
       return chat
     },

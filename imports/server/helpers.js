@@ -5,7 +5,6 @@ import { check } from 'meteor/check'
 // copy from
 // https://github.com/apollographql/meteor-integration/blob/
 // 2881dc449a1d4e96b814c35ab50f22ba92cdf563/src/main-server.js#L127
-
 export const getUserForContext = async loginToken => {
   // there is a possible current user connected!
   if (loginToken) {

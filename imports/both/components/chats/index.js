@@ -1,10 +1,6 @@
-// import { Meteor } from 'meteor/meteor'
 import React, { PureComponent } from 'react'
 import gql from 'graphql-tag'
 import { graphql, compose } from 'react-apollo'
-// import { withTracker } from 'meteor/react-meteor-data'
-
-// import Chats from '../../collections/chats'
 
 const chatSubscription = gql`
   subscription chatAdded {
@@ -18,13 +14,6 @@ const chatSubscription = gql`
 class ChatContainer extends PureComponent {
   handleSubmit = e => {
     e.preventDefault()
-    // this.props.updateQuery(previousResult => ({
-    //   ...previousResult,
-    //   posts: [
-    //     ...previousResult.posts,
-    //     { _id: Random.id(), text: this.input.value, __typename: 'Post' },
-    //   ],
-    // }))
     this.props.addChat({ text: this.input.value })
     this.form.reset()
   }
@@ -100,11 +89,6 @@ export default compose(
               text,
             },
           },
-          // optimisticResponse: {
-          //   __typename: 'Post',
-          //   _id: Random.id(),
-          //   text,
-          // },
           update: (proxy, { data: { addChat } }) => {
             const data = proxy.readQuery({ query: fetchChats })
             // don't double add the chat
@@ -117,18 +101,3 @@ export default compose(
     }),
   }),
 )(ChatContainer)
-
-// export default withTracker(() => {
-//   if (Meteor.isClient) {
-//     const handle = Meteor.subscribe('chats.list')
-//
-//     return {
-//       loading: !handle.ready(),
-//       data: Chats.find().fetch(),
-//     }
-//   } else {
-//     return {
-//       loading: true,
-//     }
-//   }
-// })(ChatContainer)

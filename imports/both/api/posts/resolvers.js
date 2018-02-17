@@ -2,13 +2,14 @@ import Posts from './'
 
 export default {
   Query: {
-    posts(obj, args) {
+    posts(root, params, context) {
       return Posts.find().fetch()
     },
   },
 
   Mutation: {
-    addPost(obj, { text }) {
+    addPost(root, params, context) {
+      const { text } = params
       const postId = Posts.insert({
         text,
       })

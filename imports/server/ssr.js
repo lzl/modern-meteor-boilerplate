@@ -1,21 +1,17 @@
 import { Meteor } from 'meteor/meteor'
 import React from 'react'
 import { onPageLoad } from 'meteor/server-render'
-// import { renderToStaticMarkup } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import LRU from 'lru-cache'
 import { ServerStyleSheet } from 'styled-components'
-import 'isomorphic-fetch'
-import { ApolloProvider, renderToStringWithData } from 'react-apollo'
 import { ApolloClient } from 'apollo-client'
-import { InMemoryCache } from 'apollo-cache-inmemory'
 import { SchemaLink } from 'apollo-link-schema'
-// import { ApolloLink, from } from 'apollo-link'
-// import { HttpLink } from 'apollo-link-http'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { ApolloProvider, renderToStringWithData } from 'react-apollo'
 
+import { getUserForContext } from './helpers'
 import schema from './schema'
 import ServerRoutes from './routes'
-import { getUserForContext } from './helpers'
 
 const ssrCache = LRU({
   max: 500,
@@ -26,32 +22,14 @@ const getSSRCache = async (url, context) => {
   if (ssrCache.has(url.pathname)) {
     return ssrCache.get(url.pathname)
   } else {
-    // const authLink = new ApolloLink((operation, forward) => {
-    //   operation.setContext(() => ({
-    //     headers: {
-    //       'meteor-login-token': context.loginToken,
-    //     },
-    //   }))
-    //   return forward(operation)
-    // })
-
-    // const httpLink = new HttpLink({
-    //   uri: `${Meteor.absoluteUrl()}/graphql`,
-    //   credentials: 'same-origin',
-    // })
-
     const userContext = await getUserForContext(context.loginToken)
-
     const schemaLink = new SchemaLink({
       schema,
       context: userContext,
     })
-
     const client = new ApolloClient({
       ssrMode: true,
       link: schemaLink,
-      // link: from([authLink, schemaLink]),
-      // link: from([authLink, httpLink]),
       cache: new InMemoryCache(),
     })
     const sheet = new ServerStyleSheet()
@@ -60,7 +38,6 @@ const getSSRCache = async (url, context) => {
         <ServerRoutes url={url} context={context} />
       </ApolloProvider>,
     )
-    // const html = renderToStaticMarkup(jsx)
     const html = await renderToStringWithData(jsx)
     const state = `<script>window.__APOLLO_STATE__=${JSON.stringify(client.extract()).replace(
       /</g,
@@ -80,8 +57,6 @@ const getSSRCache = async (url, context) => {
 }
 
 onPageLoad(async sink => {
-  // console.log('cookies:', sink.getCookies())
-  // console.log('headers:', sink.getHeaders())
   const cookies = sink.getCookies()
   const context = { loginToken: cookies.MeteorLoginToken }
   const cache = await getSSRCache(sink.request.url, context)
