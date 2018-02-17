@@ -7,6 +7,7 @@ const chatSubscription = gql`
     chatAdded {
       _id
       text
+      userId
     }
   }
 `
@@ -60,6 +61,7 @@ const fetchChats = gql`
     chats {
       _id
       text
+      userId
     }
   }
 `
@@ -69,6 +71,7 @@ const addChat = gql`
     addChat(text: $text) {
       _id
       text
+      userId
     }
   }
 `
@@ -87,6 +90,7 @@ export default compose(
               __typename: 'Chat',
               _id: null,
               text,
+              userId: null,
             },
           },
           update: (proxy, { data: { addChat } }) => {

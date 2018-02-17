@@ -1,14 +1,16 @@
 import React from 'react'
 import gql from 'graphql-tag'
-import { graphql } from 'react-apollo'
+import { graphql, withApollo } from 'react-apollo'
 
-const Me = ({ data: { loading, me } }) => {
+const logout = client => Meteor.logout(() => client.resetStore())
+
+const Me = ({ data: { loading, me }, client }) => {
   if (loading) return <div>loading...</div>
   const email = me && me.emails && me.emails[0] && me.emails[0].address
   if (email) {
     return (
       <div>
-        {email} ({me._id})
+        {email} ({me._id}) <button onClick={() => logout(client)}>Logout</button>
       </div>
     )
   } else {
@@ -27,4 +29,4 @@ const fetchMe = gql`
   }
 `
 
-export default graphql(fetchMe)(Me)
+export default graphql(fetchMe)(withApollo(Me))

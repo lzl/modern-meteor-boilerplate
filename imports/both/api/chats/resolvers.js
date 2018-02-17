@@ -11,7 +11,8 @@ export default {
   Mutation: {
     addChat(root, params, context) {
       const { text } = params
-      const chatId = Chats.insert({ text })
+      const { userId } = context
+      const chatId = Chats.insert({ text, userId })
       const chat = Chats.findOne({ _id: chatId })
       pubsub.publish('chatAdded', { chatAdded: chat })
       return chat

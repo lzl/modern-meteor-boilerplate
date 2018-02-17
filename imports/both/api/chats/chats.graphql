@@ -1,6 +1,7 @@
 type Chat {
   _id: String!
   text: String!
+  userId: String
 }
 
 extend type Query {

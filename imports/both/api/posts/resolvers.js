@@ -10,10 +10,9 @@ export default {
   Mutation: {
     addPost(root, params, context) {
       const { text } = params
-      const postId = Posts.insert({
-        text,
-      })
-      return Posts.findOne(postId)
+      const { userId } = context
+      const postId = Posts.insert({ userId, text })
+      return Posts.findOne({ _id: postId })
     },
   },
 }

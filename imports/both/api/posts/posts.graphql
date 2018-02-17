@@ -1,6 +1,7 @@
 type Post {
   _id: String!
   text: String!
+  userId: String
 }
 
 type Query {

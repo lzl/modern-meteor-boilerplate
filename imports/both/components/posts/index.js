@@ -35,6 +35,7 @@ const fetchPosts = gql`
     posts {
       _id
       text
+      userId
     }
   }
 `
@@ -44,6 +45,7 @@ const addPost = gql`
     addPost(text: $text) {
       _id
       text
+      userId
     }
   }
 `
@@ -62,6 +64,7 @@ export default compose(
               __typename: 'Post',
               _id: null,
               text,
+              userId: null,
             },
           },
           update: (proxy, { data: { addPost } }) => {
