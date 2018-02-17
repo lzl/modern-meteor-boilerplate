@@ -1,5 +1,5 @@
 {
-  "name": "meteor-boilerplate",
+  "name": "modern-meteor-boilerplate",
   "private": true,
   "scripts": {
     "start": "meteor run",
