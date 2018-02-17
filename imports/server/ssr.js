@@ -10,11 +10,12 @@ import { ApolloProvider, renderToStringWithData } from 'react-apollo'
 import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { SchemaLink } from 'apollo-link-schema'
-import { ApolloLink, from } from 'apollo-link'
-import { HttpLink } from 'apollo-link-http'
+// import { ApolloLink, from } from 'apollo-link'
+// import { HttpLink } from 'apollo-link-http'
 
 import schema from './schema'
 import ServerRoutes from './routes'
+import { getUserForContext } from './helpers'
 
 const ssrCache = LRU({
   max: 500,
@@ -25,23 +26,32 @@ const getSSRCache = async (url, context) => {
   if (ssrCache.has(url.pathname)) {
     return ssrCache.get(url.pathname)
   } else {
-    const authLink = new ApolloLink((operation, forward) => {
-      operation.setContext(() => ({
-        headers: {
-          'meteor-login-token': context.loginToken,
-        },
-      }))
-      return forward(operation)
-    })
-    const httpLink = new HttpLink({
-      uri: `${Meteor.absoluteUrl()}/graphql`,
-      credentials: 'same-origin',
+    // const authLink = new ApolloLink((operation, forward) => {
+    //   operation.setContext(() => ({
+    //     headers: {
+    //       'meteor-login-token': context.loginToken,
+    //     },
+    //   }))
+    //   return forward(operation)
+    // })
+
+    // const httpLink = new HttpLink({
+    //   uri: `${Meteor.absoluteUrl()}/graphql`,
+    //   credentials: 'same-origin',
+    // })
+
+    const userContext = await getUserForContext(context.loginToken)
+
+    const schemaLink = new SchemaLink({
+      schema,
+      context: userContext,
     })
 
     const client = new ApolloClient({
       ssrMode: true,
-      // link: new SchemaLink({ schema }),
-      link: from([authLink, httpLink]),
+      link: schemaLink,
+      // link: from([authLink, schemaLink]),
+      // link: from([authLink, httpLink]),
       cache: new InMemoryCache(),
     })
     const sheet = new ServerStyleSheet()
