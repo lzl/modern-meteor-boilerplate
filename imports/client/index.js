@@ -1,6 +1,7 @@
 import { Accounts } from 'meteor/accounts-base'
 import React from 'react'
 import { hydrate } from 'react-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { onPageLoad } from 'meteor/server-render'
 import { ApolloLink, from, split } from 'apollo-link'
 import { ApolloClient } from 'apollo-client'
@@ -8,8 +9,9 @@ import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { DDPSubscriptionLink, isSubscription } from 'meteor/swydo:ddp-apollo'
 import { ApolloProvider } from 'react-apollo'
+import { generateRoutes } from 'react-code-split-ssr'
 
-import getClientRoutes from './routes'
+import generateRoutesProps from '/imports/both/routes'
 import './accounts-config'
 
 const authLink = new ApolloLink((operation, forward) => {
@@ -33,10 +35,15 @@ const client = new ApolloClient({
 })
 
 onPageLoad(async () => {
-  const ClientRoutes = await getClientRoutes()
+  const ClientRoutes = await generateRoutes({
+    ...generateRoutesProps,
+    pathname: window.location.pathname,
+  })
   hydrate(
     <ApolloProvider client={client}>
-      <ClientRoutes />
+      <BrowserRouter>
+        <ClientRoutes />
+      </BrowserRouter>
     </ApolloProvider>,
     document.getElementById('app'),
   )

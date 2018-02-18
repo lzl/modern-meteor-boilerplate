@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import React from 'react'
+import { StaticRouter } from 'react-router'
 import { onPageLoad } from 'meteor/server-render'
 import { Helmet } from 'react-helmet'
 import LRU from 'lru-cache'
@@ -8,10 +9,11 @@ import { ApolloClient } from 'apollo-client'
 import { SchemaLink } from 'apollo-link-schema'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { ApolloProvider, renderToStringWithData } from 'react-apollo'
+import { generateRoutes } from 'react-code-split-ssr'
 
 import { getUserForContext } from './helpers'
 import schema from './schema'
-import ServerRoutes from './routes'
+import generateRoutesProps from '/imports/both/routes'
 
 const ssrCache = LRU({
   max: 500,
@@ -22,6 +24,10 @@ const getSSRCache = async (url, context) => {
   if (ssrCache.has(url.pathname)) {
     return ssrCache.get(url.pathname)
   } else {
+    const ServerRoutes = await generateRoutes({
+      ...generateRoutesProps,
+      pathname: url.pathname,
+    })
     const userContext = await getUserForContext(context.loginToken)
     const schemaLink = new SchemaLink({
       schema,
@@ -35,7 +41,9 @@ const getSSRCache = async (url, context) => {
     const sheet = new ServerStyleSheet()
     const jsx = sheet.collectStyles(
       <ApolloProvider client={client}>
-        <ServerRoutes url={url} context={context} />
+        <StaticRouter location={url.pathname} context={{}}>
+          <ServerRoutes />
+        </StaticRouter>
       </ApolloProvider>,
     )
     const html = await renderToStringWithData(jsx)
