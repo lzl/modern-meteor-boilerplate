@@ -1,12 +1,17 @@
 import { Meteor } from 'meteor/meteor'
 import React, { PureComponent } from 'react'
+import gql from 'graphql-tag'
+import { graphql } from 'react-apollo'
 
 class LoginForm extends PureComponent {
   handleSubmit = e => {
     e.preventDefault()
     const email = this.email.value
     const password = this.password.value
-    Meteor.loginWithPassword(email, password)
+    Meteor.loginWithPassword(email, password, err => {
+      if (err) return
+      this.props.data.refetch()
+    })
     this.form.reset()
   }
 
@@ -23,4 +28,15 @@ class LoginForm extends PureComponent {
   }
 }
 
-export default LoginForm
+const fetchMe = gql`
+  query Query {
+    me {
+      _id
+      emails {
+        address
+      }
+    }
+  }
+`
+
+export default graphql(fetchMe)(LoginForm)
