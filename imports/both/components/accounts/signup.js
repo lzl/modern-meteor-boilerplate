@@ -1,12 +1,17 @@
 import { Accounts } from 'meteor/accounts-base'
 import React, { PureComponent } from 'react'
+import gql from 'graphql-tag'
+import { graphql } from 'react-apollo'
 
 class SignupForm extends PureComponent {
   handleSubmit = e => {
     e.preventDefault()
     const email = this.email.value
     const password = this.password.value
-    Accounts.createUser({ email, password })
+    Accounts.createUser({ email, password }, err => {
+      if (err) return
+      this.props.data.refetch()
+    })
     this.form.reset()
   }
 
@@ -23,4 +28,15 @@ class SignupForm extends PureComponent {
   }
 }
 
-export default SignupForm
+const fetchMe = gql`
+  query Query {
+    me {
+      _id
+      emails {
+        address
+      }
+    }
+  }
+`
+
+export default graphql(fetchMe)(SignupForm)
