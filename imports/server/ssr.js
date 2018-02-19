@@ -20,9 +20,11 @@ const ssrCache = LRU({
   maxAge: 1000 * 30,
 })
 
-const getSSRCache = async (url, context) => {
-  if (ssrCache.has(url.pathname)) {
-    return ssrCache.get(url.pathname)
+const getSSRCache = async (url, context = {}) => {
+  const { loginToken } = context
+  const key = loginToken ? url.pathname + '.' + loginToken : url.pathname
+  if (ssrCache.has(key)) {
+    return ssrCache.get(key)
   } else {
     const ServerRoutes = await generateRoutes({
       ...generateRoutesProps,
@@ -56,9 +58,10 @@ const getSSRCache = async (url, context) => {
     const meta = helmet.meta.toString()
     const title = helmet.title.toString()
     const link = helmet.link.toString()
-    const newSSRCache = { html, state, styleTags, meta, title, link }
+    const newSSRCache = { loginToken, html, state, styleTags, meta, title, link }
     Meteor.defer(() => {
-      ssrCache.set(url.pathname, newSSRCache)
+      const key = loginToken ? url.pathname + '.' + loginToken : url.pathname
+      ssrCache.set(key, newSSRCache)
     })
     return newSSRCache
   }
